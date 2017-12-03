@@ -83,7 +83,9 @@ function getRandomColor() {
 }
 
 //Classes
-
+/**
+* FormOfLife is a dot
+*/
 class FormOfLife{ //en ES6
     
     constructor(x, y, canvas, contexte){
@@ -101,10 +103,41 @@ class GameMap{
     this.WIDTH=WIDTH;
     this.HEIGHT=HEIGHT;
     debug("I am a map");
+    construct_logical_map();
 
+  }
+
+  function construct_logical_map(){  
+    this.map = createArray(this.WIDTH, this.HEIGHT);
   }
 
   function drawMap(){
     //TODO
+  }
+
+  //outils pour se repérer relativement
+
+  isAlone(x, y){
+    if(exists(x-1, y)||exists(x+1, y)||exists(x, y-1)||exists(x, y+1)) return false;
+    else return true;
+  }
+
+  getNeighbours(x, y){
+    var neighbourNb = 0;
+    var neighbours = array();
+    if(exists(x-1, y)){
+      neighbours[neighbourNb++]=this.map[x-1, y];
+    }
+    if(exists(x+1, y)){
+      neighbours[neighbourNb++]=this.map[x+1, y];
+    }
+    if(exists(x, y-1)){
+      neighbours[neighbourNb++]=this.map[x, y-1];
+    }
+    if(exists(x, y+1)){
+      neighbours[neighbourNb++]=this.map[x, y+1];
+    }
+    debug("Voisins de "+x+";"+y+ " : "+neighbourNb+"\n");
+    return neighbours;
   }
 }
