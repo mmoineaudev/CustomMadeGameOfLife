@@ -1,0 +1,33 @@
+html{
+	text-align: center;
+	margin :0.3em;
+	font: normal normal 300 normal 14px normal sans-serif ;
+	color : rgb(50,50,50);
+
+}
+h1,h2,h3{
+	background-color: white;
+	box-shadow: 0.5em -0.5em lightgreen;
+	border: 0.8em dashed lightblue;
+}
+#bonhomme1{
+	background-color: lightgrey;
+	width: 100%;
+	margin:auto;
+}
+canvas{
+  border: 5px dashed pink;
+  background-color: lightgreen;
+}
+input{
+	background-color: green;
+	border: none;
+	box-shadow: 0.5em -0.5em lightgreen;
+}
+button{
+	background-color: blue;
+	border: none;
+	box-shadow: 0.5em -0.5em green;
+	color: white;
+	padding: 0.3em;
+}
