@@ -88,7 +88,7 @@ function getRandomColor() {
 */
 class FormOfLife{ //en ES6
     
-    constructor(x, y, canvas, contexte){
+    constructor(x, y){
      debug("I am a form of life");
   }
   
@@ -104,6 +104,7 @@ class GameMap{
     this.HEIGHT=HEIGHT;
     debug("I am a map");
     construct_logical_map();
+    populate();
 
   }
 
@@ -115,6 +116,14 @@ class GameMap{
     //TODO
   }
 
+  function populate(){
+  for(var x=0; x<this.WIDTH; x++){
+    for(var y=0; y<this.HEIGHT; y++){
+      //pour l'instant on remplis tout
+      this.map[x][y] = new FormOfLife(x, y);
+    }
+  } 
+  }
   //outils pour se repérer relativement
 
   isAlone(x, y){
