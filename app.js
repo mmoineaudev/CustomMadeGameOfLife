@@ -1,7 +1,13 @@
+/**
+* Author : Maxime MOINEAU - L3
+* Game Of Life
+* Pour le cours d'animation de M. Buffa
+* Sources : https://stackoverflow.com/questions/966225/how-can-i-create-a-two-dimensional-array-in-javascript/966938#966938
+* https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life
+* https://www.youtube.com/watch?v=x5n5QlxLzLU
+*/
 
-
-//TODO still.... Utiliser au moins 3 ou 4 elements input de HTML5 (color, range, number par exemple) pour paramétrer votre jeu (vitesse, taille, nombre, couleur etc)
-
+//************************
 
 window.onload=init;
 let canvas1, context, gamemap;
@@ -12,31 +18,26 @@ function debug(f){
 
 
 function init(){
-  //est-il possible d'utiliser le meme canvas pour un objet autre sans que l'anim du premier ne l'écrase  ? 
   canvas1 = document.querySelector("#canvas1");
-
   context = canvas1.getContext("2d");
   WIDTH = 300; HEIGHT=300;
   gamemap = new GameMap(context, WIDTH, HEIGHT);
-  //bonhomme2 = new Bonhomme(100,100,canvas2,context2, 0.3, color1_b2, color2_b2, color3_b2);
-
   animegamemap();
-
 }
 
 
-//comment ne pas faire de redondance ici ?
 function animegamemap(timeElapsed){
     gamemap.contexte.clearRect(0, 0, gamemap.canvas.width, gamemap.canvas.height);
-  
     gamemap.drawMap();
-
     requestAnimationFrame(animegamemap);
 
-    
 };
 
+
+//************************
 //fonctions utilitaires
+//************************
+
 function accelerate_b1(){
   //TODO
   ;
@@ -45,6 +46,7 @@ function decelerate_b1(){
   //TODO
   ;
 }
+
 /**
 * this is magic :
 * syntax : 
@@ -56,7 +58,6 @@ function decelerate_b1(){
 
 */
 function createArray(length) {
-//https://stackoverflow.com/questions/966225/how-can-i-create-a-two-dimensional-array-in-javascript/966938#966938
     var arr = new Array(length || 0),
         i = length;
 
@@ -82,7 +83,11 @@ function getRandomColor() {
   return color;
 }
 
+//************************
 //Classes
+//************************
+
+
 /**
 * FormOfLife is a dot
 */
