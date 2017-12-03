@@ -16,7 +16,7 @@ function init(){
   canvas1 = document.querySelector("#canvas1");
 
   context = canvas1.getContext("2d");
-
+  WIDTH = 300; HEIGHT=300;
   gamemap = new GameMap(context, WIDTH, HEIGHT);
   //bonhomme2 = new Bonhomme(100,100,canvas2,context2, 0.3, color1_b2, color2_b2, color3_b2);
 
@@ -103,20 +103,20 @@ class GameMap{
     this.WIDTH=WIDTH;
     this.HEIGHT=HEIGHT;
     debug("I am a map");
-    construct_logical_map();
-    populate();
+    this.buildLogicalMap();
+    this.populate();
 
   }
 
-  function construct_logical_map(){  
+   buildLogicalMap(){  
     this.map = createArray(this.WIDTH, this.HEIGHT);
   }
 
-  function drawMap(){
+   drawMap(){
     //TODO
   }
 
-  function populate(){
+   populate(){
   for(var x=0; x<this.WIDTH; x++){
     for(var y=0; y<this.HEIGHT; y++){
       //pour l'instant on remplis tout
@@ -126,12 +126,12 @@ class GameMap{
   }
   //outils pour se repérer relativement
 
-  isAlone(x, y){
+   isAlone(x, y){
     if(exists(x-1, y)||exists(x+1, y)||exists(x, y-1)||exists(x, y+1)) return false;
     else return true;
   }
 
-  getNeighbours(x, y){
+   getNeighbours(x, y){
     var neighbourNb = 0;
     var neighbours = array();
     if(exists(x-1, y)){
