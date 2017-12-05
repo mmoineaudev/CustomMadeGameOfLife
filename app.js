@@ -10,7 +10,7 @@
 //************************
 
 window.onload=init;
-let canvas1, context, gamemap;
+let canvas, context, gamemap;
 
 function debug(f){
   console.log("debug : "+f);
@@ -18,10 +18,10 @@ function debug(f){
 
 
 function init(){
-  canvas1 = document.querySelector("#canvas1");
-  context = canvas1.getContext("2d");
+  canvas = document.querySelector("#html_canvas");
+  context = canvas.getContext("2d");
   WIDTH = 100; HEIGHT=100;
-  gamemap = new GameMap(context, WIDTH, HEIGHT);
+  gamemap = new GameMap(canvas, context, WIDTH, HEIGHT);
   //animegamemap();
 }
 
@@ -120,16 +120,27 @@ class GameMap{
     this.context=context;
     this.WIDTH=WIDTH;
     this.HEIGHT=HEIGHT;
-    debug("I am a map");
-    this.buildLogicalMap();
-    this.populate();
+    debug("I am a map, this is what I do :");
     this.drawMap();
+    this.initLogicalMap();
+    
 
   }
-
-   buildLogicalMap(){  
+  initLogicalMap(){
+    debug("buildLogicalMap start");
+    this.buildLogicalMap();
+    debug("buildLogicalMap end");
+    debug("populate start");
+    this.populate();
+    debug("populate end");
+    debug("drawLogicalMap start");
+    this.drawLogicalMap();
+    debug("drawLogicalMap end");
+  }
+  buildLogicalMap(){  
     this.map = createArray(this.WIDTH, this.HEIGHT);
   }
+
 
   drawMap(){
     debug("drawMap start");
@@ -147,22 +158,19 @@ class GameMap{
   populate(){
     for(var x=0; x<this.WIDTH; x++){
       for(var y=0; y<this.HEIGHT; y++){
-        //pour l'instant on remplis tout
+        debug("populate : "+x+" ; "+y+"\n");
         this.map[x][y] = new FormOfLife(x, y);
       }
     } 
   }
 
   drawLogicalMap(){
-    debug("drawing logical map\n");
     for(var x =0; x<this.WIDTH;x++)
       for(var y = 0; y<this.HEIGHT;y++){
-        if(this.map[x][y]!=null){
+        if(this.map[x][y]){
           this.map[x][y].drawLifeForm();
         }
       }
-    debug("logical map has been drawn\n");
-
   }
   //outils pour se repérer relativement
 
