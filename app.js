@@ -102,12 +102,21 @@ class FormOfLife{ //en ES6
 
     drawLifeForm(){
       this.context.save();
-      this.context.translate(50,50);
+      this.context.translate(75,75);
       this.context.fillStyle = "white";
       this.context.fillRect(this.x,this.y, 1, 1);
       this.context.fill();
       this.context.restore();
       this.printInfos();
+    }
+
+    die(){
+      this.context.save();
+      this.context.translate(75,75);
+      this.context.fillStyle = "black";
+      this.context.fillRect(this.x,this.y, 1, 1);
+      this.context.fill();
+      this.context.restore();
     }
 
     printInfos(){
@@ -145,7 +154,7 @@ class GameMap{
     debug("drawMap start");
     this.context.save();
     //on dessine en x,y, on veut un repere relatif
-    this.context.translate(50,50);
+    this.context.translate(75,75);
     this.context.fillStyle = "black";
     this.context.fillRect(0,0, this.WIDTH, this.HEIGHT);
     this.context.fill();
@@ -165,32 +174,81 @@ class GameMap{
   drawLogicalMap(){
     for(var x =0; x<this.WIDTH;x++){
       for(var y =0; y<this.HEIGHT;y++){
-        if(this.map[x][y] && (x+y)%2==0){
+        if(this.map[x][y]){//populate all the map
           this.map[x][y].drawLifeForm();
         }
       }
     }
   }
+  lifeGoesOn(){
+    for(var x =0; x<this.WIDTH;x++){
+      for(var y =0; y<this.HEIGHT;y++){
+        if(this.map[x][y]){//populate all the map
+          live(x,y);
+        }
+      }
+    }
+  }
+  // And @author created life 
+
+  live(x,y){
+    if(this.isAlone(x,y)){//isolation
+      this.kill(x,y);
+    }else{
+      if(getNeighbours>2){//overpopulation
+        this.kill(x,y);
+      }else{//reproduction
+        this.reproduce(x,y);
+      }
+    }
+  }
+
+  kill(x,y){
+    this.map[x][y].die();
+  }
+
+  reproduce(x,y){
+    if(!this.map[x-1][y]){
+      this.map[x-1][y] = new FormOfLife(x-1, y, this.context);
+      this.map[x-1][y].drawLifeForm();
+      
+    }
+    if(!this.map[x+1][y]){
+      this.map[x+1][y] = new FormOfLife(x+1, y, this.context);
+      this.map[x+1][y].drawLifeForm();
+    }
+    if(!this.map[x][y-1]){
+      this.map[x][y-1] = new FormOfLife(x, y-1, this.context);
+      this.map[x][y-1].drawLifeForm();
+    }
+    if(!this.map[x][y+1]){
+      this.map[x][y+1] = new FormOfLife(x, y+1, this.context);
+      this.map[x][y+1].drawLifeForm();
+    }
+  }
+
   //outils pour se repérer relativement
 
-   isAlone(x, y){
-    if(exists(x-1, y)||exists(x+1, y)||exists(x, y-1)||exists(x, y+1)) return false;
+
+
+  isAlone(x, y){
+    if(this.map[x-1][y]||this.map[x+1][y]||this.map[x][y-1]||this.map[x][y+1]) return false;
     else return true;
   }
 
    getNeighbours(x, y){
     var neighbourNb = 0;
     var neighbours = array();
-    if(exists(x-1, y)){
+    if(this.map[x-1][y]){
       neighbours[neighbourNb++]=this.map[x-1, y];
     }
-    if(exists(x+1, y)){
+    if(this.map[x+1][y]){
       neighbours[neighbourNb++]=this.map[x+1, y];
     }
-    if(exists(x, y-1)){
+    if(this.map[x][y-1]){
       neighbours[neighbourNb++]=this.map[x, y-1];
     }
-    if(exists(x, y+1)){
+    if(this.map[x][y+1]){
       neighbours[neighbourNb++]=this.map[x, y+1];
     }
     debug("Voisins de "+x+";"+y+ " : "+neighbourNb+"\n");
