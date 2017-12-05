@@ -20,18 +20,18 @@ function debug(f){
 function init(){
   canvas1 = document.querySelector("#canvas1");
   context = canvas1.getContext("2d");
-  WIDTH = 300; HEIGHT=300;
+  WIDTH = 100; HEIGHT=100;
   gamemap = new GameMap(context, WIDTH, HEIGHT);
-  animegamemap();
+  //animegamemap();
 }
 
 
 function animegamemap(timeElapsed){
-    gamemap.contexte.clearRect(0, 0, gamemap.canvas.width, gamemap.canvas.height);
+    gamemap.context.clearRect(0, 0, gamemap.canvas.width, gamemap.canvas.height);
     gamemap.drawMap();
     requestAnimationFrame(animegamemap);
 
-};
+}
 
 
 //************************
@@ -95,7 +95,20 @@ class FormOfLife{ //en ES6
     
     constructor(x, y){
      debug("I am a form of life");
-  }
+    }
+
+    drawLifeForm(context){
+      debug("LifeForm drawn at "+this.x+";"+this.y+"\n");
+
+      context.save();
+      context.translate(x,y);
+
+      context.fillStyle = "white";
+      context.fillRect(0,0, 1, 1);
+      context.fill();
+
+      context.restore();
+    }
   
 }
 /**
@@ -110,6 +123,7 @@ class GameMap{
     debug("I am a map");
     this.buildLogicalMap();
     this.populate();
+    this.drawMap();
 
   }
 
@@ -117,17 +131,38 @@ class GameMap{
     this.map = createArray(this.WIDTH, this.HEIGHT);
   }
 
-   drawMap(){
-    //TODO
+  drawMap(){
+    debug("drawMap start");
+    context.save();
+    //on dessine en x,y, on veut un repere relatif
+    context.translate(50,50);
+    context.fillStyle = "black";
+    context.fillRect(0,0, this.WIDTH, this.HEIGHT);
+    context.fill();
+    context.restore();
+    debug("drawMap end");
+
   }
 
-   populate(){
-  for(var x=0; x<this.WIDTH; x++){
-    for(var y=0; y<this.HEIGHT; y++){
-      //pour l'instant on remplis tout
-      this.map[x][y] = new FormOfLife(x, y);
-    }
-  } 
+  populate(){
+    for(var x=0; x<this.WIDTH; x++){
+      for(var y=0; y<this.HEIGHT; y++){
+        //pour l'instant on remplis tout
+        this.map[x][y] = new FormOfLife(x, y);
+      }
+    } 
+  }
+
+  drawLogicalMap(){
+    debug("drawing logical map\n");
+    for(var x =0; x<this.WIDTH;x++)
+      for(var y = 0; y<this.HEIGHT;y++){
+        if(this.map[x][y]!=null){
+          this.map[x][y].drawLifeForm();
+        }
+      }
+    debug("logical map has been drawn\n");
+
   }
   //outils pour se repérer relativement
 
