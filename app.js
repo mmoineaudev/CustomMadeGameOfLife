@@ -93,21 +93,25 @@ function getRandomColor() {
 */
 class FormOfLife{ //en ES6
     
-    constructor(x, y){
-     debug("I am a form of life");
+    constructor(x, y, context){
+     this.x=x;
+     this.y=y;
+     this.context=context;
+     
     }
 
-    drawLifeForm(context){
-      debug("LifeForm drawn at "+this.x+";"+this.y+"\n");
+    drawLifeForm(){
+      this.context.save();
+      this.context.translate(50,50);
+      this.context.fillStyle = "white";
+      this.context.fillRect(this.x,this.y, 1, 1);
+      this.context.fill();
+      this.context.restore();
+      this.printInfos();
+    }
 
-      context.save();
-      context.translate(x,y);
-
-      context.fillStyle = "white";
-      context.fillRect(0,0, 1, 1);
-      context.fill();
-
-      context.restore();
+    printInfos(){
+      debug("FOL("+this.x+";"+this.y+");\n");
     }
   
 }
@@ -116,61 +120,56 @@ class FormOfLife{ //en ES6
 */
 class GameMap{
   
-  constructor(context, WIDTH, HEIGHT){
+  constructor(canvas, context, WIDTH, HEIGHT){
+    this.canvas = canvas;
     this.context=context;
     this.WIDTH=WIDTH;
     this.HEIGHT=HEIGHT;
-    debug("I am a map, this is what I do :");
-    this.drawMap();
+    this.map = createArray(this.WIDTH, this.HEIGHT);
     this.initLogicalMap();
+
+    debug("I am a map("+this.WIDTH+";"+this.HEIGHT+"), this is what I do :");
+    this.drawMap();
     
 
   }
   initLogicalMap(){
-    debug("buildLogicalMap start");
-    this.buildLogicalMap();
-    debug("buildLogicalMap end");
     debug("populate start");
     this.populate();
     debug("populate end");
-    debug("drawLogicalMap start");
-    this.drawLogicalMap();
-    debug("drawLogicalMap end");
-  }
-  buildLogicalMap(){  
-    this.map = createArray(this.WIDTH, this.HEIGHT);
+
   }
 
 
   drawMap(){
     debug("drawMap start");
-    context.save();
+    this.context.save();
     //on dessine en x,y, on veut un repere relatif
-    context.translate(50,50);
-    context.fillStyle = "black";
-    context.fillRect(0,0, this.WIDTH, this.HEIGHT);
-    context.fill();
-    context.restore();
+    this.context.translate(50,50);
+    this.context.fillStyle = "black";
+    this.context.fillRect(0,0, this.WIDTH, this.HEIGHT);
+    this.context.fill();
+    this.context.restore();
+    this.drawLogicalMap();
     debug("drawMap end");
-
   }
 
   populate(){
     for(var x=0; x<this.WIDTH; x++){
       for(var y=0; y<this.HEIGHT; y++){
-        debug("populate : "+x+" ; "+y+"\n");
-        this.map[x][y] = new FormOfLife(x, y);
+        this.map[x][y] = new FormOfLife(x, y, this.context);
       }
     } 
   }
 
   drawLogicalMap(){
-    for(var x =0; x<this.WIDTH;x++)
-      for(var y = 0; y<this.HEIGHT;y++){
-        if(this.map[x][y]){
+    for(var x =0; x<this.WIDTH;x++){
+      for(var y =0; y<this.HEIGHT;y++){
+        if(this.map[x][y] && (x+y)%2==0){
           this.map[x][y].drawLifeForm();
         }
       }
+    }
   }
   //outils pour se repérer relativement
 
