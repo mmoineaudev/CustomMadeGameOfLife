@@ -16,7 +16,10 @@ function debug(f){
   console.log("debug : "+f);
 }
 
-
+function resetLogicalMap(){
+  gamemap.initLogicalMap();
+  gamemap.populate();
+}
 function init(){
   canvas = document.querySelector("#html_canvas");
   context = canvas.getContext("2d");
@@ -103,10 +106,10 @@ class FormOfLife{ //en ES6
      this.printInfos();
     }
 
-    drawLifeForm(){
+    drawLifeForm(color){
       this.context.save();
       this.context.translate(75,75);
-      this.context.fillStyle = getRandomColor();
+      this.context.fillStyle = color;
       this.context.fillRect(this.x,this.y, 1, 1);
       this.context.fill();
       this.context.restore();
@@ -138,13 +141,13 @@ class GameMap{
     this.WIDTH=WIDTH;
     this.HEIGHT=HEIGHT;
     this.initLogicalMap();
+    this.populate2();
     debug("I am a map("+this.WIDTH+";"+this.HEIGHT+"), this is what I do :"); 
 
   }
   initLogicalMap(){
     this.map = createArray(this.WIDTH, this.HEIGHT);
     debug("populate start");
-    this.populate();
     debug("populate end");
   }
 
@@ -158,14 +161,24 @@ class GameMap{
     this.context.fillRect(0,0, this.WIDTH, this.HEIGHT);
     this.context.fill();
     this.context.restore();
-    this.drawLogicalMap();
     debug("drawMap end");
   }
 
   populate(){
     for(var x=0; x<this.WIDTH; x++){
       for(var y=0; y<this.HEIGHT; y++){
-        if(x>this.WIDTH/2 && y>this.HEIGHT/2){
+        if(x>this.WIDTH/4&&x<3*this.WIDTH/4 && y>this.HEIGHT/4 && y < 3*this.HEIGHT/4){
+          this.map[x][y] = new FormOfLife(x, y, this.context);
+        }else{
+          continue;
+        }
+      }
+    } 
+  }
+  populate2(){
+    for(var x=0; x<this.WIDTH; x++){
+      for(var y=0; y<this.HEIGHT; y++){
+        if(x+y<(this.WIDTH+this.HEIGHT)/2){
           this.map[x][y] = new FormOfLife(x, y, this.context);
         }else{
           continue;
@@ -174,15 +187,6 @@ class GameMap{
     } 
   }
 
-  drawLogicalMap(){
-    for(var x =0; x<this.WIDTH;x++){
-      for(var y =0; y<this.height;y++){
-        if(this.map[x][y] != null){
-          this.map[x][y].drawLifeForm();
-        }
-      }
-    }
-  }
   lifeGoesOn(){
     for(var x =0; x<this.WIDTH;x++){
       for(var y =0; y<this.HEIGHT;y++){
@@ -215,22 +219,23 @@ class GameMap{
   }
 
   reproduce(x,y){
+    var color = getRandomColor();
     if(x>0 && !this.map[x-1][y]){
       this.map[x-1][y] = new FormOfLife(x-1, y, this.context);
-      this.map[x-1][y].drawLifeForm();
+      this.map[x-1][y].drawLifeForm(color);
       
     }else
     if(x<this.WIDTH-1&&!this.map[x+1][y]){
       this.map[x+1][y] = new FormOfLife(x+1, y, this.context);
-      this.map[x+1][y].drawLifeForm();
+      this.map[x+1][y].drawLifeForm(color);
     }else
     if(y>1&&!this.map[x][y-1]){
       this.map[x][y-1] = new FormOfLife(x, y-1, this.context);
-      this.map[x][y-1].drawLifeForm();
+      this.map[x][y-1].drawLifeForm(color);
     }else
     if(y<this.HEIGHT-1&&!this.map[x][y+1]){
       this.map[x][y+1] = new FormOfLife(x, y+1, this.context);
-      this.map[x][y+1].drawLifeForm();
+      this.map[x][y+1].drawLifeForm(color);
     }
   }
 
