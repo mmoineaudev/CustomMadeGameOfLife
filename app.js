@@ -20,15 +20,18 @@ function debug(f){
 function init(){
   canvas = document.querySelector("#html_canvas");
   context = canvas.getContext("2d");
-  WIDTH = 100; HEIGHT=100;
+  WIDTH = 100; HEIGHT=50;
   gamemap = new GameMap(canvas, context, WIDTH, HEIGHT);
-  //animegamemap();
+ 
+  animegamemap();
 }
 
 
 function animegamemap(timeElapsed){
+    debug("animegamemap");
     gamemap.context.clearRect(0, 0, gamemap.canvas.width, gamemap.canvas.height);
     gamemap.drawMap();
+    gamemap.lifeGoesOn();
     requestAnimationFrame(animegamemap);
 
 }
@@ -97,17 +100,17 @@ class FormOfLife{ //en ES6
      this.x=x;
      this.y=y;
      this.context=context;
-     
+     this.printInfos();
     }
 
     drawLifeForm(){
       this.context.save();
       this.context.translate(75,75);
-      this.context.fillStyle = "white";
+      this.context.fillStyle = getRandomColor();
       this.context.fillRect(this.x,this.y, 1, 1);
       this.context.fill();
       this.context.restore();
-      this.printInfos();
+      debug("drawLifeForm("+this.x+";"+this.y+")");
     }
 
     die(){
@@ -134,19 +137,15 @@ class GameMap{
     this.context=context;
     this.WIDTH=WIDTH;
     this.HEIGHT=HEIGHT;
-    this.map = createArray(this.WIDTH, this.HEIGHT);
     this.initLogicalMap();
-
-    debug("I am a map("+this.WIDTH+";"+this.HEIGHT+"), this is what I do :");
-    this.drawMap();
-    
+    debug("I am a map("+this.WIDTH+";"+this.HEIGHT+"), this is what I do :"); 
 
   }
   initLogicalMap(){
+    this.map = createArray(this.WIDTH, this.HEIGHT);
     debug("populate start");
     this.populate();
     debug("populate end");
-
   }
 
 
@@ -166,15 +165,19 @@ class GameMap{
   populate(){
     for(var x=0; x<this.WIDTH; x++){
       for(var y=0; y<this.HEIGHT; y++){
-        this.map[x][y] = new FormOfLife(x, y, this.context);
+        if(x>this.WIDTH/2 && y>this.HEIGHT/2){
+          this.map[x][y] = new FormOfLife(x, y, this.context);
+        }else{
+          continue;
+        }
       }
     } 
   }
 
   drawLogicalMap(){
     for(var x =0; x<this.WIDTH;x++){
-      for(var y =0; y<this.HEIGHT;y++){
-        if(this.map[x][y]){//populate all the map
+      for(var y =0; y<this.height;y++){
+        if(this.map[x][y] != null){
           this.map[x][y].drawLifeForm();
         }
       }
@@ -184,7 +187,7 @@ class GameMap{
     for(var x =0; x<this.WIDTH;x++){
       for(var y =0; y<this.HEIGHT;y++){
         if(this.map[x][y]){//populate all the map
-          live(x,y);
+          this.live(x,y);
         }
       }
     }
@@ -192,10 +195,11 @@ class GameMap{
   // And @author created life 
 
   live(x,y){
+    debug("live "+ x+";"+y)
     if(this.isAlone(x,y)){//isolation
       this.kill(x,y);
     }else{
-      if(getNeighbours>2){//overpopulation
+      if(this.getNeighbours>2){//overpopulation
         this.kill(x,y);
       }else{//reproduction
         this.reproduce(x,y);
@@ -204,24 +208,27 @@ class GameMap{
   }
 
   kill(x,y){
-    this.map[x][y].die();
+    debug("kill " +x +";"+ y)
+    if(this.map[x][y]!=null)
+      (this.map[x][y]).die();
+    this.map[x][y]=null;
   }
 
   reproduce(x,y){
-    if(!this.map[x-1][y]){
+    if(x>0 && !this.map[x-1][y]){
       this.map[x-1][y] = new FormOfLife(x-1, y, this.context);
       this.map[x-1][y].drawLifeForm();
       
-    }
-    if(!this.map[x+1][y]){
+    }else
+    if(x<this.WIDTH-1&&!this.map[x+1][y]){
       this.map[x+1][y] = new FormOfLife(x+1, y, this.context);
       this.map[x+1][y].drawLifeForm();
-    }
-    if(!this.map[x][y-1]){
+    }else
+    if(y>1&&!this.map[x][y-1]){
       this.map[x][y-1] = new FormOfLife(x, y-1, this.context);
       this.map[x][y-1].drawLifeForm();
-    }
-    if(!this.map[x][y+1]){
+    }else
+    if(y<this.HEIGHT-1&&!this.map[x][y+1]){
       this.map[x][y+1] = new FormOfLife(x, y+1, this.context);
       this.map[x][y+1].drawLifeForm();
     }
@@ -232,23 +239,34 @@ class GameMap{
 
 
   isAlone(x, y){
-    if(this.map[x-1][y]||this.map[x+1][y]||this.map[x][y-1]||this.map[x][y+1]) return false;
+    if(x>0&&!this.map[x-1][y]){
+      return false;
+    }else
+    if(x<this.WIDTH-1 &&! this.map[x+1][y]){
+      return false;
+    }else
+    if(y>1&&!this.map[x][y-1]){
+      return false;
+    }else
+    if(y<this.HEIGHT+1&&!this.map[x][y+1]){
+      return false;
+    }
     else return true;
   }
 
    getNeighbours(x, y){
     var neighbourNb = 0;
     var neighbours = array();
-    if(this.map[x-1][y]){
+    if(x>0&&!this.map[x-1][y]){
       neighbours[neighbourNb++]=this.map[x-1, y];
     }
-    if(this.map[x+1][y]){
+    if(x<this.WIDTH+1&&!this.map[x+1][y]){
       neighbours[neighbourNb++]=this.map[x+1, y];
     }
-    if(this.map[x][y-1]){
+    if(y>1&&!this.map[x][y-1]){
       neighbours[neighbourNb++]=this.map[x, y-1];
     }
-    if(this.map[x][y+1]){
+    if(y<this.HEIGHT+1&&!this.map[x][y+1]){
       neighbours[neighbourNb++]=this.map[x, y+1];
     }
     debug("Voisins de "+x+";"+y+ " : "+neighbourNb+"\n");
