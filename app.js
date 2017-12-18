@@ -2,7 +2,7 @@
  * Author : Maxime MOINEAU - L3
  * Game Of Life
  * Pour le cours d'animation de M. Buffa
- * Sources : https://stackoverflow.com/questions/966212/how-can-i-create-a-two-dimensional-array-in-javascript/966938#966938
+ * Sources : https://stackoverflow.com/questions/96626/how-can-i-create-a-two-dimensional-array-in-javascript/966938#966938
  * https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life
  * https://www.youtube.com/watch?v=x5n5QlxLzLU
  */
@@ -20,9 +20,8 @@ function debug(f){
 function init(){
     canvas = document.querySelector("#html_canvas");
     context = canvas.getContext("2d");
-    WIDTH = 10; HEIGHT=5;
-    gamemap = new GameMap(canvas, context, WIDTH*10, HEIGHT*10);
-    
+    WIDTH = 30; HEIGHT=30;
+    gamemap = new AgingGameMap(canvas, context, WIDTH, HEIGHT);
     animegamemap();
 }
 
@@ -33,11 +32,11 @@ function resetLogicalMap(){
 }
 
 function setAgingMap(){
-    gamemap = new AgingGameMap(canvas, context, WIDTH*10, HEIGHT*10);
+    gamemap = new AgingGameMap(canvas, context, WIDTH, HEIGHT);
 }
 
 function animegamemap(timeElapsed){
-    debug("animegamemap");
+    //debug("animegamemap");
     gamemap.context.clearRect(0, 0, gamemap.canvas.width, gamemap.canvas.height);
     gamemap.drawMap();
     gamemap.lifeGoesOn();
@@ -115,17 +114,17 @@ class FormOfLife{ //en ES6
     
     drawLifeForm(color){
         this.context.save();
-        this.context.translate(12,12);
+        this.context.translate(3,3);
         this.context.fillStyle = color;
         this.context.fillRect(this.x*10,this.y*10, 1*10, 1*10);
         this.context.fill();
         this.context.restore();
-        debug("drawLifeForm("+this.x*10+";"+this.y*10+")");
+        //debug("drawLifeForm("+this.x*10+";"+this.y*10+")");
     }
     
     die(){
         this.context.save();
-        this.context.translate(12,12);
+        this.context.translate(3,3);
         this.context.fillStyle = "black";
         this.context.fillRect(this.x*10,this.y*10, 1, 1);
         this.context.fill();
@@ -140,18 +139,19 @@ class FormOfLife{ //en ES6
 
 class AgingFormOfLife extends FormOfLife{
     constructor(x, y, context){
-        this.age=0;
+        
         super(x,y,context);
+        this.age=0;
     }
     
     drawLifeForm(color){
         this.context.save();
-        this.context.translate(12,12);
+        this.context.translate(3,3);
         this.context.fillStyle = color;
         this.context.fillRect(this.x*10,this.y*10, 1*10, 1*10);
         this.context.fill();
         this.context.restore();
-        debug("drawLifeForm("+this.x*10+";"+this.y*10+")");
+        debug("!!!drawALifeForm("+this.age+")");
     }
     getAge(){
         return this.age;
@@ -187,29 +187,23 @@ class GameMap{
     }
     initLogicalMap(){
         this.map = createArray(this.WIDTH, this.HEIGHT);
-        debug("populate start");
-        debug("populate end");
     }
     
-    
     drawMap(){
-        debug("drawMap start");
+        
         this.context.save();
         //on dessine en x,y, on veut un repere relatif
-        this.context.translate(12,12);
+        this.context.translate(3,3);
         this.context.fillStyle = "black";
         this.context.fillRect(0,0, this.WIDTH*10, this.HEIGHT*10);
         this.context.fill();
         this.context.restore();
-        debug("drawMap end");
+        
     }
     
     populate(){
         for(var x=0; x<this.WIDTH; x++){
             for(var y=0; y<this.HEIGHT; y++){
-                /* if(x>this.WIDTH/4&&x<3*this.WIDTH/4 && y>this.HEIGHT/4 && y < 3*this.HEIGHT/4){
-                 *          this.map[x][y] = new FormOfLife(x, y, this.context);
-                 */ 
                 //let us try a more random approach to be overriden
                 if(Math.random()>0.9){
                     this.map[x][y] = new FormOfLife(x, y, this.context);
@@ -230,8 +224,8 @@ class GameMap{
             }
         }
     }
-    // And @author created life 
     
+    // And @author created life 
     live(x,y){
         debug("live "+ x+";"+y)
         if(this.isAlone(x,y)){//isolation
@@ -240,7 +234,7 @@ class GameMap{
             if(this.getNeighbours>2){//overpopulation
                 this.kill(x,y);
             }else{//reproduction
-                this.reproduce(x,y);
+                this.reproduce(x,y, getRandomColor());
             }
         }
     }
@@ -252,8 +246,8 @@ class GameMap{
         this.map[x][y]=null;
     }
     
-    reproduce(x,y){
-        var color = getRandomColor();
+    reproduce(x,y, color){
+       
         if(x>0 && !this.map[x-1][y]){
             this.map[x-1][y] = new FormOfLife(x-1, y, this.context);
             this.map[x-1][y].drawLifeForm(color);
@@ -308,18 +302,20 @@ class GameMap{
         if(y<this.HEIGHT+1&&!this.map[x][y+1]){
             neighbours[neighbourNb++]=this.map[x, y+1];
         }
-        debug("Voisins de "+x+";"+y+ " : "+neighbourNb+"\n");
+        //debug("Voisins de "+x+";"+y+ " : "+neighbourNb+"\n");
         return neighbours;
     }
 }
-class AgingMap extends GameMap{
+class AgingGameMap extends GameMap{
     constructor(canvas, context, WIDTH, HEIGHT){	       
         super(canvas, context, WIDTH, HEIGHT);		        
+        debug("I am a aging map("+this.WIDTH+";"+this.HEIGHT+"), this is what I do :"); 
     }
     populate(){
         for(var x=0; x<this.WIDTH; x++){
             for(var y=0; y<this.HEIGHT; y++){
-                if(x>y){
+                if(true){
+               	   debug("new AFOL - population");
                     this.map[x][y] = new AgingFormOfLife(x, y, this.context);
                 }else{
                     continue;
@@ -328,15 +324,22 @@ class AgingMap extends GameMap{
         } 
     }
     live(x,y){
-        debug("live "+ x+";"+y)
-        this.map[x][y].ages();
-        if(this.map[x][y].getAge()>5 || this.isAlone(x,y)) { //isolation or age
-            this.kill(x,y);
-        }else{
-            if(this.getNeighbours>2){//overpopulation
+        //debug("live "+ x+";"+y)
+        if(this.map[x][y] instanceof AgingFormOfLife) {
+            
+            this.map[x][y].ages();
+            debug("AFOL lives and ages : "+ this.map[x][y].getAge());
+       
+            if(this.map[x][y].getAge()>9) { //isolation or age
                 this.kill(x,y);
-            }else{//reproduction
-                this.reproduce(x,y);
+            }else{
+                if(this.getNeighbours>3){//overpopulation
+                    this.kill(x,y);
+                }else{//reproduction
+                    var color="#"+this.map[x][y].getAge()+"FFFFF";
+                    //debug("AFOL color : "+color);
+                    this.reproduce(x,y, color);
+                }
             }
         }
     }
