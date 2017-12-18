@@ -1,2 +1,2 @@
 # CustomMadeGameOfLife
-At this point I have no idea 
+This game will allow to generate several forms of life and see them evolve 

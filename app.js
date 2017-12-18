@@ -23,8 +23,8 @@ function resetLogicalMap(){
 function init(){
   canvas = document.querySelector("#html_canvas");
   context = canvas.getContext("2d");
-  WIDTH = 100; HEIGHT=50;
-  gamemap = new GameMap(canvas, context, WIDTH, HEIGHT);
+  WIDTH = 10; HEIGHT=5;
+  gamemap = new GameMap(canvas, context, WIDTH*10, HEIGHT*10);
  
   animegamemap();
 }
@@ -108,25 +108,25 @@ class FormOfLife{ //en ES6
 
     drawLifeForm(color){
       this.context.save();
-      this.context.translate(75,75);
+      this.context.translate(25,25);
       this.context.fillStyle = color;
-      this.context.fillRect(this.x,this.y, 1, 1);
+      this.context.fillRect(this.x*10,this.y*10, 1*10, 1*10);
       this.context.fill();
       this.context.restore();
-      debug("drawLifeForm("+this.x+";"+this.y+")");
+      debug("drawLifeForm("+this.x*10+";"+this.y*10+")");
     }
 
     die(){
       this.context.save();
-      this.context.translate(75,75);
+      this.context.translate(25,25);
       this.context.fillStyle = "black";
-      this.context.fillRect(this.x,this.y, 1, 1);
+      this.context.fillRect(this.x*10,this.y*10, 1, 1);
       this.context.fill();
       this.context.restore();
     }
 
     printInfos(){
-      debug("FOL("+this.x+";"+this.y+");\n");
+      debug("FOL("+this.x*10+";"+this.y*10+");\n");
     }
   
 }
@@ -156,9 +156,9 @@ class GameMap{
     debug("drawMap start");
     this.context.save();
     //on dessine en x,y, on veut un repere relatif
-    this.context.translate(75,75);
+    this.context.translate(25,25);
     this.context.fillStyle = "black";
-    this.context.fillRect(0,0, this.WIDTH, this.HEIGHT);
+    this.context.fillRect(0,0, this.WIDTH*10, this.HEIGHT*10);
     this.context.fill();
     this.context.restore();
     debug("drawMap end");
