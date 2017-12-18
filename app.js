@@ -2,7 +2,7 @@
  * Author : Maxime MOINEAU - L3
  * Game Of Life
  * Pour le cours d'animation de M. Buffa
- * Sources : https://stackoverflow.com/questions/966225/how-can-i-create-a-two-dimensional-array-in-javascript/966938#966938
+ * Sources : https://stackoverflow.com/questions/966212/how-can-i-create-a-two-dimensional-array-in-javascript/966938#966938
  * https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life
  * https://www.youtube.com/watch?v=x5n5QlxLzLU
  */
@@ -108,7 +108,7 @@ class FormOfLife{ //en ES6
     
     drawLifeForm(color){
         this.context.save();
-        this.context.translate(25,25);
+        this.context.translate(12,12);
         this.context.fillStyle = color;
         this.context.fillRect(this.x*10,this.y*10, 1*10, 1*10);
         this.context.fill();
@@ -118,7 +118,7 @@ class FormOfLife{ //en ES6
     
     die(){
         this.context.save();
-        this.context.translate(25,25);
+        this.context.translate(12,12);
         this.context.fillStyle = "black";
         this.context.fillRect(this.x*10,this.y*10, 1, 1);
         this.context.fill();
@@ -156,7 +156,7 @@ class GameMap{
         debug("drawMap start");
         this.context.save();
         //on dessine en x,y, on veut un repere relatif
-        this.context.translate(25,25);
+        this.context.translate(12,12);
         this.context.fillStyle = "black";
         this.context.fillRect(0,0, this.WIDTH*10, this.HEIGHT*10);
         this.context.fill();
