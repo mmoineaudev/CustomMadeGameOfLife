@@ -133,6 +133,15 @@ class FormOfLife{ //en ES6
 /**
  * GameMap is meant to possess the bidimensionnal array and the drawLMap Method
  */
+class AgingMap extends GameMap{
+	constructor(canvas, context, WIDTH, HEIGHT){	       
+		super(canvas, context, WIDTH, HEIGHT);
+
+		//TODO
+	        
+    }
+	
+}
 class GameMap{
     
     constructor(canvas, context, WIDTH, HEIGHT){
@@ -171,7 +180,7 @@ class GameMap{
                  *          this.map[x][y] = new FormOfLife(x, y, this.context);
                  */ 
                 //let us try a more random approach to be overriden
-                if(Math.random()>0.5){
+                if(Math.random()>0.9){
                     this.map[x][y] = new FormOfLife(x, y, this.context);
                 }else{
                     continue;
