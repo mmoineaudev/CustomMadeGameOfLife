@@ -10,16 +10,13 @@
 //************************
 
 window.onload=init;
+
 let canvas, context, gamemap;
 
 function debug(f){
     console.log("debug : "+f);
 }
 
-function resetLogicalMap(){
-    gamemap.initLogicalMap();
-    gamemap.populate();
-}
 function init(){
     canvas = document.querySelector("#html_canvas");
     context = canvas.getContext("2d");
@@ -29,6 +26,15 @@ function init(){
     animegamemap();
 }
 
+
+function resetLogicalMap(){
+    gamemap.initLogicalMap();
+    gamemap.populate();
+}
+
+function setAgingMap(){
+    gamemap = new AgingGameMap(canvas, context, WIDTH*10, HEIGHT*10);
+}
 
 function animegamemap(timeElapsed){
     debug("animegamemap");
@@ -97,6 +103,7 @@ function getRandomColor() {
 /**
  * FormOfLife is a dot
  */
+
 class FormOfLife{ //en ES6
     
     constructor(x, y, context){
@@ -130,18 +137,42 @@ class FormOfLife{ //en ES6
     }
     
 }
+
+class AgingFormOfLife extends FormOfLife{
+    constructor(x, y, context){
+        this.age=0;
+        super(x,y,context);
+    }
+    
+    drawLifeForm(color){
+        this.context.save();
+        this.context.translate(12,12);
+        this.context.fillStyle = color;
+        this.context.fillRect(this.x*10,this.y*10, 1*10, 1*10);
+        this.context.fill();
+        this.context.restore();
+        debug("drawLifeForm("+this.x*10+";"+this.y*10+")");
+    }
+    getAge(){
+        return this.age;
+    }
+    ages(){
+        this.age++;
+    }
+    
+    die(){
+        super.die();
+        this.age=0;
+    }
+    
+    printInfos(){
+        debug("AFOL("+this.x*10+";"+this.y*10+");\n");
+    }
+    
+}
 /**
  * GameMap is meant to possess the bidimensionnal array and the drawLMap Method
  */
-class AgingMap extends GameMap{
-	constructor(canvas, context, WIDTH, HEIGHT){	       
-		super(canvas, context, WIDTH, HEIGHT);
-
-		//TODO
-	        
-    }
-	
-}
 class GameMap{
     
     constructor(canvas, context, WIDTH, HEIGHT){
@@ -281,3 +312,33 @@ class GameMap{
         return neighbours;
     }
 }
+class AgingMap extends GameMap{
+    constructor(canvas, context, WIDTH, HEIGHT){	       
+        super(canvas, context, WIDTH, HEIGHT);		        
+    }
+    populate(){
+        for(var x=0; x<this.WIDTH; x++){
+            for(var y=0; y<this.HEIGHT; y++){
+                if(x>y){
+                    this.map[x][y] = new AgingFormOfLife(x, y, this.context);
+                }else{
+                    continue;
+                }
+            }
+        } 
+    }
+    live(x,y){
+        debug("live "+ x+";"+y)
+        this.map[x][y].ages();
+        if(this.map[x][y].getAge()>5 || this.isAlone(x,y)) { //isolation or age
+            this.kill(x,y);
+        }else{
+            if(this.getNeighbours>2){//overpopulation
+                this.kill(x,y);
+            }else{//reproduction
+                this.reproduce(x,y);
+            }
+        }
+    }
+}
+
