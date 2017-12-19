@@ -10,7 +10,7 @@
 //************************
 
 window.onload=init;
-
+const GROSSISSEMENT = 10;
 let canvas, context, gamemap;
 
 function debug(f){
@@ -20,8 +20,8 @@ function debug(f){
 function init(){
     canvas = document.querySelector("#html_canvas");
     context = canvas.getContext("2d");
-    WIDTH = 30; HEIGHT=30;
-    gamemap = new AgingGameMap(canvas, context, WIDTH, HEIGHT);
+    WIDTH = 25; HEIGHT=25;
+    gamemap = new GameMap(canvas, context, WIDTH, HEIGHT);
     animegamemap();
 }
 
@@ -49,15 +49,6 @@ function animegamemap(timeElapsed){
 //fonctions utilitaires
 //************************
 
-function accelerate_b1(){
-    //TODO
-    ;
-}
-function decelerate_b1(){
-    //TODO
-    ;
-}
-
 /**
  * this is magic :
  * syntax : 
@@ -81,7 +72,6 @@ function createArray(length) {
 }
 
 
-
 /**
  * maybe useful later
  */
@@ -94,6 +84,8 @@ function getRandomColor() {
     return color;
 }
 
+
+
 //************************
 //Classes
 //************************
@@ -102,8 +94,7 @@ function getRandomColor() {
 /**
  * FormOfLife is a dot
  */
-
-class FormOfLife{ //en ES6
+class FormOfLife{
     
     constructor(x, y, context){
         this.x=x;
@@ -114,44 +105,42 @@ class FormOfLife{ //en ES6
     
     drawLifeForm(color){
         this.context.save();
-        this.context.translate(3,3);
+        this.context.translate(0,0);
         this.context.fillStyle = color;
-        this.context.fillRect(this.x*10,this.y*10, 1*10, 1*10);
+        this.context.fillRect(this.x,this.y, 1*GROSSISSEMENT, 1*GROSSISSEMENT);
         this.context.fill();
         this.context.restore();
-        //debug("drawLifeForm("+this.x*10+";"+this.y*10+")");
     }
     
     die(){
         this.context.save();
-        this.context.translate(3,3);
+        this.context.translate(0,0);
         this.context.fillStyle = "black";
-        this.context.fillRect(this.x*10,this.y*10, 1, 1);
+        this.context.fillRect(this.x,this.y, 1*GROSSISSEMENT, 1*GROSSISSEMENT);
         this.context.fill();
         this.context.restore();
     }
     
     printInfos(){
-        debug("FOL("+this.x*10+";"+this.y*10+");\n");
+        debug("FOL("+this.x+";"+this.y+");\n");
     }
     
 }
 
 class AgingFormOfLife extends FormOfLife{
     constructor(x, y, context){
-        
         super(x,y,context);
         this.age=0;
+        this.drawLifeForm("green");
     }
     
     drawLifeForm(color){
         this.context.save();
-        this.context.translate(3,3);
+        this.context.translate(0,0);
         this.context.fillStyle = color;
-        this.context.fillRect(this.x*10,this.y*10, 1*10, 1*10);
+        this.context.fillRect(this.x,this.y, 1*GROSSISSEMENT, 1*GROSSISSEMENT);
         this.context.fill();
         this.context.restore();
-        debug("!!!drawALifeForm("+this.age+")");
     }
     getAge(){
         return this.age;
@@ -166,7 +155,7 @@ class AgingFormOfLife extends FormOfLife{
     }
     
     printInfos(){
-        debug("AFOL("+this.x*10+";"+this.y*10+");\n");
+        debug("AFOL("+this.x+";"+this.y+");\n");
     }
     
 }
@@ -193,9 +182,9 @@ class GameMap{
         
         this.context.save();
         //on dessine en x,y, on veut un repere relatif
-        this.context.translate(3,3);
+        this.context.translate(0,0);
         this.context.fillStyle = "black";
-        this.context.fillRect(0,0, this.WIDTH*10, this.HEIGHT*10);
+        this.context.fillRect(0,0, this.WIDTH*GROSSISSEMENT, this.HEIGHT*GROSSISSEMENT);
         this.context.fill();
         this.context.restore();
         
@@ -205,8 +194,8 @@ class GameMap{
         for(var x=0; x<this.WIDTH; x++){
             for(var y=0; y<this.HEIGHT; y++){
                 //let us try a more random approach to be overriden
-                if(Math.random()>0.9){
-                    this.map[x][y] = new FormOfLife(x, y, this.context);
+                if(Math.random()>0.5){
+                    this.map[x][y] = new FormOfLife(x*GROSSISSEMENT, y*GROSSISSEMENT, this.context);
                 }else{
                     continue;
                     
@@ -218,7 +207,7 @@ class GameMap{
     lifeGoesOn(){
         for(var x =0; x<this.WIDTH;x++){
             for(var y =0; y<this.HEIGHT;y++){
-                if(this.map[x][y]){//populate all the map
+                if(this.map[x][y]){
                     this.live(x,y);
                 }
             }
@@ -249,20 +238,20 @@ class GameMap{
     reproduce(x,y, color){
        
         if(x>0 && !this.map[x-1][y]){
-            this.map[x-1][y] = new FormOfLife(x-1, y, this.context);
+            this.map[x-1][y] = new FormOfLife((x-1)*GROSSISSEMENT, y*GROSSISSEMENT, this.context);
             this.map[x-1][y].drawLifeForm(color);
             
         }else
             if(x<this.WIDTH-1&&!this.map[x+1][y]){
-                this.map[x+1][y] = new FormOfLife(x+1, y, this.context);
+                this.map[x+1][y] = new FormOfLife((x+1)*GROSSISSEMENT, y*GROSSISSEMENT, this.context);
                 this.map[x+1][y].drawLifeForm(color);
             }else
                 if(y>1&&!this.map[x][y-1]){
-                    this.map[x][y-1] = new FormOfLife(x, y-1, this.context);
+                    this.map[x][y-1] = new FormOfLife(x*GROSSISSEMENT, (y-1)*GROSSISSEMENT, this.context);
                     this.map[x][y-1].drawLifeForm(color);
                 }else
                     if(y<this.HEIGHT-1&&!this.map[x][y+1]){
-                        this.map[x][y+1] = new FormOfLife(x, y+1, this.context);
+                        this.map[x][y+1] = new FormOfLife(x*GROSSISSEMENT, (y+1)*GROSSISSEMENT, this.context);
                         this.map[x][y+1].drawLifeForm(color);
                     }
     }
@@ -306,6 +295,8 @@ class GameMap{
         return neighbours;
     }
 }
+
+
 class AgingGameMap extends GameMap{
     constructor(canvas, context, WIDTH, HEIGHT){	       
         super(canvas, context, WIDTH, HEIGHT);		        
@@ -329,11 +320,12 @@ class AgingGameMap extends GameMap{
             
             this.map[x][y].ages();
             debug("AFOL lives and ages : "+ this.map[x][y].getAge());
+            this.map[x][y].drawLifeForm("green");
        
             if(this.map[x][y].getAge()>9) { //isolation or age
                 this.kill(x,y);
             }else{
-                if(this.getNeighbours>3){//overpopulation
+                if(this.getNeighbours()>3){//overpopulation
                     this.kill(x,y);
                 }else{//reproduction
                     var color="#"+this.map[x][y].getAge()+"FFFFF";
