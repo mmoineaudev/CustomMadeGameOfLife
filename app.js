@@ -211,6 +211,10 @@ class GameMap{
         
     }
     
+    spawnAt(){
+        //TODO !
+    }
+
     populate(){
         for(var x=0; x<this.WIDTH; x++){
             for(var y=0; y<this.HEIGHT; y++){
