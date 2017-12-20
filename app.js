@@ -11,6 +11,8 @@
 
 window.onload=init;
 const GROSSISSEMENT = 10;
+const MAX_AGE = 2;
+var autoOn = false;
 let canvas, context, gamemap;
 
 function debug(f){
@@ -20,9 +22,9 @@ function debug(f){
 function init(){
     canvas = document.querySelector("#html_canvas");
     context = canvas.getContext("2d");
-    WIDTH = 25; HEIGHT=25;
+    WIDTH = 50; HEIGHT=50;
     gamemap = new GameMap(canvas, context, WIDTH, HEIGHT);
-    animegamemap();
+    nextStep();
 }
 
 
@@ -31,19 +33,35 @@ function resetLogicalMap(){
     gamemap.populate();
 }
 
-function setAgingMap(){
-    gamemap = new AgingGameMap(canvas, context, WIDTH, HEIGHT);
-    resetLogicalMap();
-}
+function setOtherMap(){
+    if(gamemap instanceof AgingGameMap){
+        gamemap = new GameMap(canvas, context, WIDTH, HEIGHT);
+        debug("classic");
+    }else{
+        gamemap = new AgingGameMap(canvas, context, WIDTH, HEIGHT);
+        debug("aging");
 
-function animegamemap(timeElapsed){
-    //debug("animegamemap");
+    }
+    gamemap.drawMap();
+    nextStep();
+    
+}
+function nextStep(){
     gamemap.context.clearRect(0, 0, WIDTH*GROSSISSEMENT, HEIGHT*GROSSISSEMENT);
     gamemap.drawMap();
     gamemap.lifeGoesOn();
-    requestAnimationFrame(animegamemap);
-    
 }
+function setAnimationOn(){
+    autoOn=true;
+}
+function setAnimationOff(){
+    autoOn=false;
+}
+
+function animegamemap(timeElapsed){
+    nextStep();
+    (autoOn)?requestAnimationFrame(animegamemap):debug("animation off");   
+ }
 
 
 //************************
@@ -123,7 +141,7 @@ class FormOfLife{
     }
     
     printInfos(){
-        debug("FOL("+this.x+";"+this.y+");\n");
+        //debug("FOL("+this.x+";"+this.y+");\n");
     }
     
 }
@@ -136,7 +154,7 @@ class AgingFormOfLife extends FormOfLife{
     }
     
     drawALifeForm(color){
-        debug("drawing :"+this.x+";" + this.y +" ;");
+        //debug("drawing :"+this.x+";" + this.y +" ;");
         this.context.save();
         this.context.translate(0,0);
         this.context.fillStyle = color;
@@ -158,7 +176,7 @@ class AgingFormOfLife extends FormOfLife{
     }
     
     printInfos(){
-        debug("AFOL("+this.x+";"+this.y+");\n");
+        //debug("AFOL("+this.x+";"+this.y+");\n");
     }
     
 }
@@ -173,7 +191,7 @@ class GameMap{
         this.HEIGHT=HEIGHT;
         this.initLogicalMap();
         this.populate();
-        debug("GAMEMAP"); 
+        //debug("GAMEMAP"); 
         
     }
     initLogicalMap(){
@@ -219,21 +237,21 @@ class GameMap{
     // And @author created life 
     live(x,y){
         if(this.isAlone(x,y)){//isolation
-            debug("isolation");
+            //debug("isolation");
             this.kill(x,y);
         }else{
             if(this.getNeighbours>3){//overpopulation
-                debug("overpopulation");
+                //debug("overpopulation");
                 this.kill(x,y);
             }else{//reproduction
-                debug("reproduction");
+                //debug("reproduction");
                 this.reproduce(x,y, getRandomColor());
             }
         }
     }
     
     kill(x,y){
-        //debug("kill " +x +";"+ y)
+        ////debug("kill " +x +";"+ y)
         if(this.map[x][y]!=null)
             (this.map[x][y]).die();
         this.map[x][y]=null;
@@ -296,7 +314,7 @@ class GameMap{
         if(y<this.HEIGHT+1&&!this.map[x][y+1]){
             neighbours[neighbourNb++]=this.map[x, y+1];
         }
-        //debug("Voisins de "+x+";"+y+ " : "+neighbourNb+"\n");
+        ////debug("Voisins de "+x+";"+y+ " : "+neighbourNb+"\n");
         return neighbours;
     }
 }
@@ -305,20 +323,24 @@ class GameMap{
  * AgingGameMap 
  **/
 class AgingGameMap extends GameMap{
+
+
     constructor(canvas, context, WIDTH, HEIGHT){	       
         super(canvas, context, WIDTH, HEIGHT);	
         this.initLogicalMap();
         this.populate();
-        debug("AGINGMAP"); 
+        this.canReproduce = 0;
+        //debug("AGINGMAP"); 
     }
     
     
     populate(){
+        this.drawMap();
         for(var x=0; x<this.WIDTH; x++){
             for(var y=0; y<this.HEIGHT; y++){
                  if(Math.random()>0.9){
                     this.map[x][y] = new AgingFormOfLife(x*GROSSISSEMENT, y*GROSSISSEMENT, this.context);
-                    this.map[x][y].drawALifeForm("red");
+                    this.map[x][y].drawALifeForm("green");
                  }continue;
             }
         } 
@@ -335,22 +357,23 @@ class AgingGameMap extends GameMap{
     }
     
     live(x,y){
-        //debug("live "+ x+";"+y)
+        ////debug("live "+ x+";"+y)
         if(this.map[x][y] instanceof AgingFormOfLife) {
             this.map[x][y].ages();       
            // var color="#"+this.map[x][y].getAge()+"FFFFF";
-            var color="white";
+            var color= "green";
             this.map[x][y].drawALifeForm(color);
-            if(this.map[x][y].getAge()>2 || this.isAlone(x,y)) { //isolation or age
-                debug("age");
+            if(this.map[x][y].getAge()>MAX_AGE) { //or age
+                //debug("age");
                 this.kill(x,y);
             }else{
                 if(this.getNeighbours()>2){//overpopulation
-                    debug("overpopulation");
+                    //debug("overpopulation");
                     this.kill(x,y);
                 }else{//reproduction
-                    debug("reproduction");
-                    this.reproduce(x,y, color);
+                    //debug("reproduction");
+                    if(this.canReproduce++%MAX_AGE)//too much AFOLs !
+                        this.reproduce(x,y, color);
                 }
             }
         }
