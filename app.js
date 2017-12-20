@@ -11,7 +11,7 @@
 
 window.onload=init;
 const GROSSISSEMENT = 10;
-const MAX_AGE = 2;
+const MAX_AGE = 3;
 var autoOn = false;
 let canvas, context, gamemap;
 
@@ -31,6 +31,7 @@ function init(){
 function resetLogicalMap(){
     gamemap.initLogicalMap();
     gamemap.populate();
+    nextStep();
 }
 
 function setOtherMap(){
@@ -305,13 +306,13 @@ class GameMap{
         if(x>0&&!this.map[x-1][y]){
             neighbours[neighbourNb++]=this.map[x-1, y];
         }
-        if(x<this.WIDTH+1&&!this.map[x+1][y]){
+        if(x<this.WIDTH&&!this.map[x+1][y]){
             neighbours[neighbourNb++]=this.map[x+1, y];
         }
-        if(y>1&&!this.map[x][y-1]){
+        if(y>0&&!this.map[x][y-1]){
             neighbours[neighbourNb++]=this.map[x, y-1];
         }
-        if(y<this.HEIGHT+1&&!this.map[x][y+1]){
+        if(y<this.HEIGHT&&!this.map[x][y+1]){
             neighbours[neighbourNb++]=this.map[x, y+1];
         }
         ////debug("Voisins de "+x+";"+y+ " : "+neighbourNb+"\n");
@@ -362,18 +363,28 @@ class AgingGameMap extends GameMap{
             this.map[x][y].ages();       
            // var color="#"+this.map[x][y].getAge()+"FFFFF";
             var color= "green";
+            if(this.map[x][y].getAge()==1)
+                color= "#0099ff";
+
+            if(this.map[x][y].getAge()==2)
+                color= "#9933ff";
+
+            if(this.map[x][y].getAge()==3)
+                color= "#ff6600";
+
             this.map[x][y].drawALifeForm(color);
             if(this.map[x][y].getAge()>MAX_AGE) { //or age
                 //debug("age");
                 this.kill(x,y);
             }else{
-                if(this.getNeighbours()>2){//overpopulation
+                if(this.getNeighbours()>=2){//overpopulation
                     //debug("overpopulation");
                     this.kill(x,y);
                 }else{//reproduction
                     //debug("reproduction");
-                    if(this.canReproduce++%MAX_AGE)//too much AFOLs !
-                        this.reproduce(x,y, color);
+                   if(this.canReproduce++%MAX_AGE==0){//too much AFOLs !
+                        this.reproduce(x,y, "red");
+                    }
                 }
             }
         }
