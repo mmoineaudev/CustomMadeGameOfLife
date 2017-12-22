@@ -384,17 +384,105 @@ class GameMap{
 }
 
 /**
+ * WeirdGameMap 
+ **/
+class WeirdGameMap extends GameMap{
+
+
+    constructor(canvas, context, WIDTH, HEIGHT){           
+        super(canvas, context, WIDTH, HEIGHT);  
+        this.initLogicalMap();
+        this.populate();
+        this.canReproduce = 0;
+        debug("WeirdMap"); 
+    }
+    populate(){
+        this.drawMap();
+        for(var x=0; x<this.WIDTH; x++){
+            for(var y=0; y<this.HEIGHT; y++){
+                 if(Math.random()>0.9){
+                    this.map[x][y] = new AgingFormOfLife(x*GROSSISSEMENT, y*GROSSISSEMENT, this.context);
+                    this.map[x][y].drawALifeForm("white");
+                 }continue;
+            }
+        } 
+    }
+    lifeGoesOn(){
+        for(var x =0; x<this.WIDTH;x++){
+            for(var y =0; y<this.HEIGHT;y++){
+                if(this.map[x][y]){
+                    this.live(x,y);
+                }
+            }
+        }
+    }
+    
+    live(x,y){
+        ////debug("live "+ x+";"+y)
+        if(this.map[x][y] instanceof AgingFormOfLife) {
+            this.map[x][y].ages();       
+           // var color="#"+this.map[x][y].getAge()+"FFFFF";
+            var color= "green";
+            if(this.map[x][y].getAge()==1)
+                color= "orange";
+
+            this.map[x][y].drawALifeForm(color);
+            if(this.map[x][y].getAge()>MAX_AGE) { //or age
+                //debug("age");
+                this.kill(x,y);
+            }else{
+                if(this.canReproduce++%MAX_AGE==0){//too much AFOLs !
+
+                if(this.getNeighbours()==4){//overpopulation
+                    //debug("overpopulation");
+                        this.reproduce(x,y, "blue");
+                }else{//reproduction
+                    //debug("reproduction");
+                    this.kill(x,y);
+                }
+                    
+                }else{
+                    this.reproduce(x,y, "white");
+                }
+            }
+        }
+    }
+
+    
+    reproduce(x,y, color){     
+        if(x>0 && !this.map[x-1][y]){
+            this.map[x-1][y] = new AgingFormOfLife((x-1)*GROSSISSEMENT, y*GROSSISSEMENT, this.context);
+            this.map[x-1][y].drawALifeForm(color);
+        }else
+            if(x<this.WIDTH-1&&!this.map[x+1][y]){
+                this.map[x+1][y] = new AgingFormOfLife((x+1)*GROSSISSEMENT, y*GROSSISSEMENT, this.context);
+                this.map[x+1][y].drawALifeForm(color);
+            }else
+                if(y>1&&!this.map[x][y-1]){
+                    this.map[x][y-1] = new AgingFormOfLife(x*GROSSISSEMENT, (y-1)*GROSSISSEMENT, this.context);
+                    this.map[x][y-1].drawALifeForm(color);
+                }else
+                    if(y<this.HEIGHT-1&&!this.map[x][y+1]){
+                        this.map[x][y+1] = new AgingFormOfLife(x*GROSSISSEMENT, (y+1)*GROSSISSEMENT, this.context);
+                        this.map[x][y+1].drawALifeForm(color);
+
+        }
+    }
+    
+}
+/**
  * AgingGameMap 
  **/
 class AgingGameMap extends GameMap{
 
 
-    constructor(canvas, context, WIDTH, HEIGHT){	       
-        super(canvas, context, WIDTH, HEIGHT);	
+    constructor(canvas, context, WIDTH, HEIGHT){          
+
+        super(canvas, context, WIDTH, HEIGHT);  
         this.initLogicalMap();
         this.populate();
         this.canReproduce = 0;
-        //debug("AGINGMAP"); 
+        debug("aging");
     }
     populate(){
         this.drawMap();
