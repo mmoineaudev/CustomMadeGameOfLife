@@ -13,6 +13,7 @@ window.onload=init;
 const GROSSISSEMENT = 10;
 const MAX_AGE = 3;
 var autoOn = false;
+var alive = 0;
 let canvas, context, gamemap;
 
 function debug(f){
@@ -32,6 +33,7 @@ function resetLogicalMap(){
     gamemap.populate();
     nextStep();
     setAnimationOff();
+    alive=0;
 }
 
 function setAgingMap(){
@@ -54,6 +56,7 @@ function nextStep(){
     gamemap.context.clearRect(0, 0, WIDTH*GROSSISSEMENT, HEIGHT*GROSSISSEMENT);
     gamemap.drawMap();
     gamemap.lifeGoesOn();
+    displayAliveNumber();
 }
 function setAnimationOn(){
     autoOn=true;
@@ -61,7 +64,9 @@ function setAnimationOn(){
 function setAnimationOff(){
     autoOn=false;
 }
-
+function displayAliveNumber(){
+    document.getElementById("alive").innerHTML='total FOL since the beginning :'+alive;
+}
 function animegamemap(timeElapsed){
     nextStep();
     (autoOn)?requestAnimationFrame(animegamemap):debug("animation off");   
@@ -291,11 +296,14 @@ class GameMap{
     live(x,y){
         if(this.isAlone(x,y)){//isolation
             //debug("isolation");
+            
             this.kill(x,y);
         }else{
             if(this.getNeighbours > 3){//overpopulation
                 //debug("overpopulation");
                 this.kill(x,y);
+                
+
             }else{//reproduction
                 //debug("reproduction");
                 this.reproduce(x,y, getRandomColor());
@@ -311,6 +319,7 @@ class GameMap{
     }
     
     reproduce(x,y, color){
+        alive++;
        
         if(x>0 && !this.map[x-1][y]){
             this.map[x-1][y] = new FormOfLife((x-1)*GROSSISSEMENT, y*GROSSISSEMENT, this.context);
@@ -426,10 +435,12 @@ class AgingGameMap extends GameMap{
             this.map[x][y].drawALifeForm(color);
             if(this.map[x][y].getAge()>MAX_AGE) { //or age
                 //debug("age");
+        
                 this.kill(x,y);
             }else{
                 if(this.getNeighbours >=2){//overpopulation
                     //debug("overpopulation");
+        
                     this.kill(x,y);
                 }else{//reproduction
                     //debug("reproduction");
@@ -442,7 +453,8 @@ class AgingGameMap extends GameMap{
     }
 
     
-    reproduce(x,y, color){     
+    reproduce(x,y, color){
+    alive++;     
         if(x>0 && !this.map[x-1][y]){
             this.map[x-1][y] = new AgingFormOfLife((x-1)*GROSSISSEMENT, y*GROSSISSEMENT, this.context);
             this.map[x-1][y].drawALifeForm(color);
@@ -506,19 +518,29 @@ class ParanormalGameMap extends GameMap{
             var color= this.map[x][y].getColor();
             this.map[x][y].drawPLifeForm(color);
             
-            if(this.map[x][y].getFacteur()%4==0) { 
+            if(this.map[x][y].getFacteur()%2==0 && alive<1000 ) { 
                 this.reproduce(x,y, color);
+                alive++;
             }if(this.getNeighbours(x,y)>3) { 
                 this.kill(x,y);
+                alive--;
             }
             else{
-                (Math.random()>0.5)?this.kill(x,y):this.reproduce(x,y, "white"); 
+                if(alive<1000 ){
+                    this.reproduce(x,y, "white"); 
+                }
+                if(alive>this.WIDTH*this.HEIGHT/2  ){
+                    this.kill(x,y);
+                    alive--;
+                }
+                
             }
         }
     }
 
       
-reproduce(x,y, color){     
+reproduce(x,y, color){
+    alive++;     
     if(x<this.WIDTH-1&&!this.map[x+1][y]){
     this.map[x+1][y] = new ParanormalFormOfLife((x+1)*GROSSISSEMENT, y*GROSSISSEMENT, this.context);
     this.map[x+1][y].drawPLifeForm(color);
