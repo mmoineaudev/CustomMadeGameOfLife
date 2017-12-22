@@ -585,7 +585,7 @@ class AgingGameMap extends GameMap{
 /**
  * AgingGameMap 
  **/
-class ParanormalGameMap extends AgingGameMap{
+class ParanormalGameMap extends GameMap{
 
 
     constructor(canvas, context, WIDTH, HEIGHT){           
@@ -600,14 +600,16 @@ class ParanormalGameMap extends AgingGameMap{
         this.drawMap();
         for(var x=0; x<this.WIDTH; x++){
             for(var y=0; y<this.HEIGHT; y++){
-                 if( ((x-this.WIDTH/2)*(x-this.WIDTH/2)+(y-this.HEIGHT/2)*(y-this.HEIGHT/2))==((this.HEIGHT)*(this.HEIGHT)+(this.WIDTH)*(this.WIDTH))/500){
 
-                    /*
-                    x==(this.WIDTH-y) || 
-                    y==(this.HEIGHT-x) || 
-                    y==this.HEIGHT/2 || 
-                    x==this.WIDTH/2 ||
-                    */
+                 if( ((x+1-this.WIDTH/2)*(x+1-this.WIDTH/2)+(y-this.HEIGHT/2)*(y-this.HEIGHT/2))==((this.HEIGHT)*(this.HEIGHT)+(this.WIDTH)*(this.WIDTH))/500 || 
+                    ((x+1-this.WIDTH/2)*(x+1-this.WIDTH/2)+(y+1-this.HEIGHT/2)*(y+1-this.HEIGHT/2))==((this.HEIGHT)*(this.HEIGHT)+(this.WIDTH)*(this.WIDTH))/500 ||
+                    ((x+2-this.WIDTH/2)*(x+2-this.WIDTH/2)+(y+2-this.HEIGHT/2)*(y+2-this.HEIGHT/2))==((this.HEIGHT)*(this.HEIGHT)+(this.WIDTH)*(this.WIDTH))/500||
+                     x==Math.floor(this.WIDTH/2) || y==Math.floor(this.HEIGHT/2)||
+                     x+3==Math.floor(this.WIDTH/2) || y+3==Math.floor(this.HEIGHT/2)||
+                     x+2==Math.floor(this.WIDTH/2) || y+2==Math.floor(this.HEIGHT/2)||
+                     x+1==Math.floor(this.WIDTH/2) || y+1==Math.floor(this.HEIGHT/2)){
+
+                
                     this.map[x][y] = new ParanormalFormOfLife(x*GROSSISSEMENT, y*GROSSISSEMENT, this.context);
                     this.map[x][y].drawPLifeForm(this.map[x][y].getColor());
                  }
@@ -621,8 +623,12 @@ class ParanormalGameMap extends AgingGameMap{
                 if(this.map[x][y]){
                     this.live(x,y);
                 }
-                if(alive%10000==0){
+                if(alive%1000==0){
                     this.populate();
+                }
+                if(this.isAlone(x,y)) {
+                    debug("isalone ?")
+                    this.reproduce(x,y, "blue");
                 }
             }
         }
