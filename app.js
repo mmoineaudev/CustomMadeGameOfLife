@@ -31,6 +31,7 @@ function init(){
 function resetLogicalMap(){
     gamemap.populate();
     nextStep();
+    setAnimationOff();
 }
 
 function setAgingMap(){
@@ -368,8 +369,8 @@ class GameMap{
             neighbours[neighbourNb++]=this.map[x][y+1];
         }
     }
-        debug("Voisins de "+x+";"+y+ " : "+neighbourNb+"\n");
-        return neighbours;
+        //debug("Voisins de "+x+";"+y+ " : "+neighbourNb+"\n");
+        return neighbourNb;
     }
 }
 
