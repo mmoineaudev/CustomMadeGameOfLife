@@ -17,7 +17,13 @@ h1,h2,h3{
 	border: 0.8em solid green;
 }
 #gamemap{
+	background-color: darkslategrey;
+}
+.header{
+	font: normal normal 300 normal 1.8em normal sans-serif ;
+	color : black;
 	background-color: white;
+
 }
 canvas{
   border: 5px dashed pink;

@@ -23,7 +23,7 @@ function debug(f){
 function init(){
     canvas = document.querySelector("#html_canvas");
     context = canvas.getContext("2d");
-    WIDTH = 50; HEIGHT=50;
+    WIDTH = 150; HEIGHT=50;
     gamemap = new GameMap(canvas, context, WIDTH, HEIGHT);
     nextStep();
 }
@@ -137,6 +137,7 @@ class FormOfLife{
     }
     
     drawLifeForm(color){
+        alive++;
         this.context.save();
         this.context.translate(0,0);
         this.context.fillStyle = color;
@@ -146,6 +147,7 @@ class FormOfLife{
     }
     
     die(){
+        alive--;
         this.context.save();
         this.context.translate(0,0);
         this.context.fillStyle = "black";
@@ -168,6 +170,7 @@ class AgingFormOfLife extends FormOfLife{
     }
     
     drawALifeForm(color){
+        alive++;
         //debug("drawing :"+this.x+";" + this.y +" ;");
         this.context.save();
         this.context.translate(0,0);
@@ -202,6 +205,7 @@ class ParanormalFormOfLife extends FormOfLife{
     }
     
     drawPLifeForm(color){
+        alive++;
         this.context.save();
         this.context.translate(0,0);
         this.context.fillStyle = color;
@@ -320,6 +324,7 @@ class GameMap{
         ////debug("kill " +x +";"+ y)
         if(this.map[x][y]!=null)
             (this.map[x][y]).die();
+            alive--;
         this.map[x][y]=null;
     }
     
@@ -404,16 +409,27 @@ class WeirdGameMap extends GameMap{
         this.drawMap();
         for(var x=0; x<this.WIDTH; x++){
             for(var y=0; y<this.HEIGHT; y++){
-                 if(Math.random()>0.95){
+                 if(Math.random()>0.3){
                     this.map[x][y] = new AgingFormOfLife(x*GROSSISSEMENT, y*GROSSISSEMENT, this.context);
-                    this.map[x][y].drawALifeForm("white");
-                 }continue;
+                    this.map[x][y].drawALifeForm("green");
+                    
+                 }
             }
         } 
     }
     lifeGoesOn(){
         for(var x =0; x<this.WIDTH;x++){
             for(var y =0; y<this.HEIGHT;y++){
+                if(alive%1000==0) {
+                    
+                    for(var x2 =1; x<this.WIDTH-1;x++)
+                        for(var y2 =1; y<this.HEIGHT-1;y++)
+                            if(this.map[x2][y2] instanceof AgingFormOfLife && (x2==y2|| x2==this.WIDTH/2 || y2==this.HEIGHT/2 )) {
+                                this.kill(x,y);
+                                debug("killed it");
+                            }
+
+                }
                 if(this.map[x][y]){
                     this.live(x,y);
                 }
@@ -429,25 +445,22 @@ class WeirdGameMap extends GameMap{
 
 
             if(this.map[x][y].getAge()>MAX_AGE) {
+
                 this.kill(x,y);
-                return;
             }else{
                 var color= "green";
-            
+                
                 if(this.map[x][y].getAge()==2)
                     color= "red";
                 if(this.map[x][y].getAge()==1)
                     color= "orange";
                 
                 this.map[x][y].drawALifeForm(color);
+                if(this.isAlone(x,y)) this.reproduce(x,y,"blue");
                 if(this.canReproduce++%MAX_AGE==0){//too much AFOLs !
-                    if(this.getNeighbours(x,y)==2){//overpopulation
-                        //debug("overpopulation");
-                            this.reproduce(x,y, "blue");
-                    }
-                    this.kill(x,y);
+                    this.reproduce(x,y, "purple");
                 }else{
-                    this.reproduce(x,y, "white");
+                    if(alive>0)this.kill(x,y);
                 }
             }
         }
@@ -535,7 +548,12 @@ class AgingGameMap extends GameMap{
                     //debug("overpopulation");
         
                     this.kill(x,y);
-                }else{//reproduction
+                }if(this.getNeighbours(x,y)==0){//overpopulation
+                    //debug("overpopulation");
+                    this.reproduce(x,y, "red");
+                    
+                }
+                else{//reproduction
                     //debug("reproduction");
                    if(this.canReproduce++%MAX_AGE==0){//too much AFOLs !
                         this.reproduce(x,y, "red");
