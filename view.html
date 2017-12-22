@@ -7,18 +7,30 @@
   <title>bonhomme</title>
 </head>
 <body>
-	<div id="gamemap">
-		<h1>(Custom) Game of Life</h1>
-		<div float="left" width=50%>
-			<canvas height=500 width=500 id="html_canvas"></canvas>
-		</div>	
-		<div float="right" width=50%>
-			<button onclick="nextStep()"> --> </button>
-			<button onclick="setAnimationOn();animegamemap()"> set autoLife (risk of electronic fire) </button>
-			<button onclick="setAnimationOff()"> stop autoLife</button>
-            <button onclick="resetLogicalMap()">Reset</button>
-            <button onclick="setOtherMap()">another bacteria</button>
+	<h1>(Custom) Game of Life</h1>
+	<div class="left">
+			<h2 id="alive">?</h2>
+			<button onclick="setAgingMap()"> Aging </button>
+			<button onclick="setClassicMap()"> Classic </button>
+			<button onclick="setParanormalMap()"> Paranormal</button>
 		</div>
+	<div id="gamemap" class="center">		
+		<div >
+			<canvas height=500 width="500" id="html_canvas"></canvas>
+		</div>	
 	</div>       
+	<div class="right">
+			<div >
+				<button onclick="nextStep()"> Next frame </button>
+			</div>
+			<div  class="dual-button">
+				<div>AutoLife :</div>
+					<button onclick="setAnimationOn();animegamemap()"> ON</button>
+					<button onclick="setAnimationOff()"> OFF</button>
+			</div>
+			<div >
+            		<button onclick="resetLogicalMap()">Reset game map</button>
+			</div>
+	</div>
 </body>
 </html>
