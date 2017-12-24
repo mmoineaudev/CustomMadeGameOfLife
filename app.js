@@ -23,9 +23,48 @@ function debug(f){
 function init(){
     canvas = document.querySelector("#html_canvas");
     context = canvas.getContext("2d");
-    WIDTH = 150; HEIGHT=50;
+    WIDTH = canvas.width/GROSSISSEMENT; 
+    HEIGHT=canvas.height/GROSSISSEMENT;
+    debug("HEIGHT "+HEIGHT);
+    debug("WIDTH "+WIDTH);
+    //for spawnOnClick
+     // mouse listener
+
     gamemap = new GameMap(canvas, context, WIDTH, HEIGHT);
     nextStep();
+
+    canvas.addEventListener('mousedown', function (evt) {
+        mousePos = getMousePos(canvas, evt);
+        var fol;
+        if(gamemap instanceof WeirdGameMap){
+            debug("WeirdGameMap");
+
+            fol = new AgingFormOfLife(Math.floor(mousePos.x), Math.floor(mousePos.y), context);
+            fol.drawALifeForm("red");
+        }else if(gamemap instanceof ParanormalGameMap){
+            debug("ParanormalGameMap");
+
+            fol = new ParanormalFormOfLife(Math.floor(mousePos.x), Math.floor(mousePos.y), context);
+            fol.drawPLifeForm("red");
+
+        }else if(gamemap instanceof AgingGameMap){
+            debug("AgingGameMap");
+
+            fol = new AgingFormOfLife(Math.floor(mousePos.x), Math.floor(mousePos.y), context);
+            fol.drawALifeForm("red");
+
+        }
+        else if(gamemap instanceof GameMap){
+            debug("classic");
+            fol = new FormOfLife(Math.floor(mousePos.x), Math.floor(mousePos.y), context);
+            fol.drawLifeForm("red");
+        } 
+
+        gamemap.addFOL(mousePos.x, mousePos.y, fol);
+        debug("end");
+
+    }, false);
+    
 }
 
 
@@ -104,6 +143,28 @@ function createArray(length) {
     
     return arr;
 }
+/*
+* source : http://jsbin.com/AseVidu/7/edit?css,js,output dans https://mainline.i3s.unice.fr/HTML5slides/canvasFR.html#1
+*/
+ function getMousePos(canvas, evt) {
+            // get canvas position
+            var obj = canvas;
+            var top = 0;
+            var left = 0;
+            while (obj && obj.tagName != 'BODY') {
+                top += obj.offsetTop;
+                left += obj.offsetLeft;
+                obj = obj.offsetParent;
+            }
+
+            // return relative mouse position
+            var mouseX = evt.clientX - left + window.pageXOffset;
+            var mouseY = evt.clientY - top + window.pageYOffset;
+            return {
+                x:mouseX,
+                y:mouseY
+            };
+        }
 
 
 /**
@@ -195,11 +256,10 @@ class AgingFormOfLife extends FormOfLife{
     }
     
     printInfos(){
-        //debug("AFOL("+this.x+";"+this.y+");\n");
     }
     
 }
-class ParanormalFormOfLife extends FormOfLife{
+class ParanormalFormOfLife extends AgingFormOfLife{
     constructor(x, y, context){
         super(x,y,context);
         this.facteur=Math.random()*(x+y);//the paranormal factor
@@ -216,10 +276,10 @@ class ParanormalFormOfLife extends FormOfLife{
     }
 
    getColor(){
-        var color = '#'+Math.floor(this.facteur);
+        var color = '#'+Math.floor(this.facteur)+''+Math.floor(this.facteur);
         var res = color;
-        if(color.length<7){
-            for(var i=7-color.length; i>0; i--)
+        if(color.length<6){
+            for(var i=6-color.length; i>0; i--)
                 res+='F';
         }
         return res;
@@ -232,16 +292,18 @@ class ParanormalFormOfLife extends FormOfLife{
 
     die(){  
         super.die();
-        this.context.save();
-        this.context.translate(0,0);
-        this.context.fillStyle = "darkred";
-        this.context.fillRect(this.x,this.y, 1*GROSSISSEMENT, 1*GROSSISSEMENT);
-        this.context.fill();
-        this.context.restore();
+        this.drawDot();
     }
     
     printInfos(){
-        //debug("AFOL("+this.x+";"+this.y+");\n");
+    }
+    drawDot(){
+        this.context.save();
+        this.context.translate(0,0);
+        this.context.fillStyle = "white";
+        this.context.fillRect(this.x,this.y, 1*GROSSISSEMENT, 1*GROSSISSEMENT);
+        this.context.fill();
+        this.context.restore();
     }
     
 }
@@ -273,9 +335,10 @@ class GameMap{
         this.context.restore();
         
     }
-    
-    spawnAt(){
-        //TODO !
+    addFOL(x, y, fol){
+        debug("x= "+x+"; y ="+y);
+        this.map[Math.floor(x/GROSSISSEMENT)][Math.floor(y/GROSSISSEMENT)] = fol;
+        alive++;
     }
 
     populate(){
@@ -305,24 +368,20 @@ class GameMap{
     // And @author created life 
     live(x,y){
         if(this.isAlone(x,y)){//isolation
-            //debug("isolation");
             
             this.kill(x,y);
         }else{
             if(this.getNeighbours(x,y)> 3){//overpopulation
-                //debug("overpopulation");
                 this.kill(x,y);
                 
 
             }else{//reproduction
-                //debug("reproduction");
                 this.reproduce(x,y, getRandomColor());
             }
         }
     }
     
     kill(x,y){
-        ////debug("kill " +x +";"+ y)
         if(this.map[x][y]!=null)
             (this.map[x][y]).die();
         this.map[x][y]=null;
@@ -388,7 +447,6 @@ class GameMap{
             neighbours[neighbourNb++]=this.map[x][y+1];
         }
     }
-        //debug("Voisins de "+x+";"+y+ " : "+neighbourNb+"\n");
         return neighbourNb;
     }
 }
@@ -405,8 +463,10 @@ class WeirdGameMap extends GameMap{
         this.populate();
         this.canReproduce = 0;
         this.color = "green";
-        debug("WeirdMap"); 
     }
+    
+
+
     populate(){
         for(var x=0; x<this.WIDTH; x++){
             for(var y=0; y<this.HEIGHT; y++){
@@ -428,7 +488,6 @@ class WeirdGameMap extends GameMap{
                         for(var y2 =1; y<this.HEIGHT-1;y++)
                             if(this.map[x2][y2] instanceof AgingFormOfLife && (x2==y2 || x2==this.WIDTH/2 || y2==this.HEIGHT/2 ) ) {
                                 this.kill(x2,y2);
-                                debug("killed it");
                             }
                 }
                 if(this.map[x][y]){
@@ -439,7 +498,6 @@ class WeirdGameMap extends GameMap{
     }
     
     live(x,y){
-        ////debug("live "+ x+";"+y)
         if(this.map[x][y] instanceof AgingFormOfLife) {
             this.map[x][y].ages();       
             if(this.map[x][y].getAge()>MAX_AGE) {
@@ -494,16 +552,13 @@ class AgingGameMap extends GameMap{
         this.initLogicalMap();
         this.populate();
         this.canReproduce = 0;
-        this.color = "green";
-
-        debug("aging");
-
+        this.color = "purple";
     }
     populate(){
         this.drawMap();
         for(var x=0; x<this.WIDTH; x++){
             for(var y=0; y<this.HEIGHT; y++){
-                 if(Math.random()>0.9){
+                 if(y+x > 3* (this.WIDTH + this.HEIGHT)/4){
                     this.map[x][y] = new AgingFormOfLife(x*GROSSISSEMENT, y*GROSSISSEMENT, this.context);
                     this.map[x][y].drawALifeForm(this.color);
                  }continue;
@@ -521,36 +576,31 @@ class AgingGameMap extends GameMap{
     }
     
     live(x,y){
-        ////debug("live "+ x+";"+y)
         if(this.map[x][y] instanceof AgingFormOfLife) {
             this.map[x][y].ages();       
            // var color="#"+this.map[x][y].getAge()+"FFFFF";
-            var color= "green";
+            var color;
             if(this.map[x][y].getAge()==1)
-                color= "blue";
+                color= "green";
 
             if(this.map[x][y].getAge()==2)
-                color= "lightblue";
+                color= "orange";
 
             if(this.map[x][y].getAge()==3)
-                color= "lightgreen";
+                color= "red";
 
             this.map[x][y].drawALifeForm(color);
             if(this.map[x][y].getAge()>MAX_AGE) { //or age
-                //debug("age");
         
                 this.kill(x,y);
             }else{
                 if(this.getNeighbours(x,y)>=3 && alive>1000){//overpopulation
-                    //debug("overpopulation");
                     this.kill(x,y);
-                }if(this.getNeighbours(x,y)<=2){//overpopulation
-                    //debug("overpopulation");
-                    this.reproduce(x,y, getRandomColor());
+                }if(this.getNeighbours(x,y)<=1){//overpopulation
+                    this.reproduce(x,y, "purple");
                     
                 }
                 else{//reproduction
-                    //debug("reproduction");
                    if(this.canReproduce++%MAX_AGE==0){//too much AFOLs !
                         this.reproduce(x,y, "purple");
                     }
@@ -590,6 +640,7 @@ class ParanormalGameMap extends GameMap{
 
     constructor(canvas, context, WIDTH, HEIGHT){           
         super(canvas, context, WIDTH, HEIGHT);  
+        
         this.initLogicalMap();
         this.populate();
         this.canReproduce = 0;
@@ -601,18 +652,11 @@ class ParanormalGameMap extends GameMap{
         for(var x=0; x<this.WIDTH; x++){
             for(var y=0; y<this.HEIGHT; y++){
 
-                 if( ((x+1-this.WIDTH/2)*(x+1-this.WIDTH/2)+(y-this.HEIGHT/2)*(y-this.HEIGHT/2))==((this.HEIGHT)*(this.HEIGHT)+(this.WIDTH)*(this.WIDTH))/500 || 
-                    ((x+1-this.WIDTH/2)*(x+1-this.WIDTH/2)+(y+1-this.HEIGHT/2)*(y+1-this.HEIGHT/2))==((this.HEIGHT)*(this.HEIGHT)+(this.WIDTH)*(this.WIDTH))/500 ||
-                    ((x+2-this.WIDTH/2)*(x+2-this.WIDTH/2)+(y+2-this.HEIGHT/2)*(y+2-this.HEIGHT/2))==((this.HEIGHT)*(this.HEIGHT)+(this.WIDTH)*(this.WIDTH))/500||
-                     x==Math.floor(this.WIDTH/2) || y==Math.floor(this.HEIGHT/2)||
-                     x+3==Math.floor(this.WIDTH/2) || y+3==Math.floor(this.HEIGHT/2)||
-                     x+2==Math.floor(this.WIDTH/2) || y+2==Math.floor(this.HEIGHT/2)||
-                     x+1==Math.floor(this.WIDTH/2) || y+1==Math.floor(this.HEIGHT/2)){
-
-                
+              
                     this.map[x][y] = new ParanormalFormOfLife(x*GROSSISSEMENT, y*GROSSISSEMENT, this.context);
                     this.map[x][y].drawPLifeForm(this.map[x][y].getColor());
-                 }
+               
+                
             }
         } 
     }
@@ -623,42 +667,27 @@ class ParanormalGameMap extends GameMap{
                 if(this.map[x][y]){
                     this.live(x,y);
                 }
-                if(alive%1000==0){
-                    this.populate();
-                }
-                if(this.isAlone(x,y)) {
-                    debug("isalone ?")
-                    this.reproduce(x,y, "blue");
-                }
             }
         }
     }
     
     live(x,y){
-        ////debug("live "+ x+";"+y)
         if(this.map[x][y] instanceof ParanormalFormOfLife) {
             var color= this.map[x][y].getColor();
-            if(this.map[x][y] instanceof AgingGameMap) {
-                    this.map[x][y].ages();
-                if(this.map[x][y].getAge()>MAX_AGE*10){
-                    this.kill(x,y);
-                    return;
-                } 
-            }
-            if(this.map[x][y].getFacteur()%2==0 && alive<1000 ) { 
-                this.reproduce(x,y, color);
-            }if(this.getNeighbours(x,y)>3) { 
+            this.map[x][y].ages();
+            if(this.map[x][y].getAge()>MAX_AGE*10){
                 this.kill(x,y);
-            }else{
-                if(alive<1000 ){
-                    this.reproduce(x,y, "white"); 
-                }else{
-                    this.kill(x,y);
-                }
-                
-            }
+            return;
+            } 
+        }
+        if(this.map[x][y].getFacteur()%2==0 && this.getNeighbours(x,y)<=this.map[x][y].getAge()) { 
+            this.reproduce(x,y, color);
+     
+        }else{
+            this.kill(x,y);                
         }
     }
+
 
       
 reproduce(x,y, color){
