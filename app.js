@@ -45,19 +45,19 @@ function init(){
             debug("ParanormalGameMap");
 
             fol = new ParanormalFormOfLife(Math.floor(mousePos.x), Math.floor(mousePos.y), context);
-            fol.drawPLifeForm("red");
+            fol.drawPLifeForm(getRandomColor());
 
         }else if(gamemap instanceof AgingGameMap){
             debug("AgingGameMap");
 
             fol = new AgingFormOfLife(Math.floor(mousePos.x), Math.floor(mousePos.y), context);
-            fol.drawALifeForm("red");
+            fol.drawALifeForm(getRandomColor());
 
         }
         else if(gamemap instanceof GameMap){
             debug("classic");
             fol = new FormOfLife(Math.floor(mousePos.x), Math.floor(mousePos.y), context);
-            fol.drawLifeForm("red");
+            fol.drawLifeForm(getRandomColor());
         } 
 
         gamemap.addFOL(mousePos.x, mousePos.y, fol);
